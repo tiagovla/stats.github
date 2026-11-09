@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "github-stats"
+version = "0.1.0"
+description = "GitHub contribution, language, and activity stats"
+requires-python = ">=3.12"
+dependencies = ["requests>=2.31"]
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[tool.setuptools.packages.find]
+include = ["github_stats*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+*.egg-info/
+build/
+
+# Local build output; keep fixture previews available to the repository.
+dist/*
+!dist/sample.svg
+!dist/sample-light.svg
+!dist/languages-sample.svg
+!dist/activity-sample.svg

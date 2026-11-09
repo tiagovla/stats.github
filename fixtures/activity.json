@@ -1,0 +1,18 @@
+{
+  "start": "2016-01-01",
+  "end": "2026-11-08",
+  "stars": 248,
+  "commits": 8421,
+  "pull_requests": 312,
+  "issues": 157,
+  "repositories": 64,
+  "rank_inputs": {
+    "commits": 1284,
+    "prs": 164,
+    "issues": 79,
+    "reviews": 31,
+    "repos": 27,
+    "stars": 248,
+    "followers": 62
+  }
+}
