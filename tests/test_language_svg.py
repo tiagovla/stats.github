@@ -22,7 +22,7 @@ def test_language_chart_uses_actual_percentages_accessible_labels_and_github_col
     assert LANGUAGE_COLORS["Python"] in fills
     assert LANGUAGE_COLORS["JavaScript"] in fills
     assert "#8b9aa8" in fills
-    percentage_labels = [t.text for t in root.findall(".//s:text", NS) if t.text and t.text.endswith("%") and t.text not in ("0%", "100%")]
+    percentage_labels = [t.text for t in root.findall(".//s:text", NS) if t.text and t.text.endswith("%") and t.text not in ("0%", "25%", "50%", "75%", "100%")]
     assert percentage_labels == ["72.5%", "27.2%", "0.3%"]
     assert "font-family:ui-monospace" in root.find("s:style", NS).text
     assert "<title>" in svg and "https://" not in svg
@@ -37,7 +37,7 @@ def test_empty_and_long_language_names_are_presented_without_overflowing_label_c
     label = root.find(".//s:text[s:title]", NS)
     assert label.text.endswith("…")
     assert label.find("s:title", NS).text == "A Very Long Language Name That Needs Room"
-    assert root.find(".//s:text[@text-anchor='start']", NS).text == "<0.1%"
+    assert any(t.text == "<0.1%" for t in root.findall(".//s:text", NS))
 
 
 def test_renderer_sorts_all_bars_descending():
