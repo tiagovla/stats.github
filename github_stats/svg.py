@@ -71,12 +71,14 @@ def render_svg(layout: StatsLayout, schedule, theme: str = "dark") -> str:
     _el(clip, "rect", x=left, y=plot_top, width=right-left, height=plot_bottom-plot_top)
     scan_clip = _el(defs, "clipPath", id="scan-clip", clipPathUnits="userSpaceOnUse")
     _el(scan_clip, "rect", x=left, y=plot_top, width=right-left, height=rows_top+7*row_pitch-plot_top+2)
+    wave_clip = _el(defs, "clipPath", id="wave-clip", clipPathUnits="userSpaceOnUse")
+    _el(wave_clip, "rect", x=left, y=plot_top, width=right-left, height=plot_bottom-plot_top)
 
     style = _el(root, "style")
     css = [
         f"svg{{font-family:system-ui,sans-serif;color:{colors['text']}}}",
         f".panel{{fill:url(#shell);stroke:url(#bezel);stroke-width:1.4}}.inset{{fill:url(#inset);stroke:{colors['bezel']};stroke-width:1.1}}.header{{fill:url(#shell);stroke:{colors['bezel']};stroke-width:1}}.grid{{stroke:{colors['grid']};stroke-width:.8}}",
-        f".text{{fill:{colors['text']}}}.muted{{fill:{colors['muted']}}}.wave-preview{{fill:none;stroke:{colors['preview']};stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round}}",
+        f".text{{fill:{colors['text']}}}.muted{{fill:{colors['muted']}}}.wave-line{{fill:none;stroke:{colors['line']};stroke-width:2.7;stroke-linejoin:round;stroke-linecap:round}}",
         f".wave-area{{fill:{colors['area']};opacity:.16}}.wave-line{{fill:none;stroke:{colors['line']};stroke-width:2.3;stroke-linejoin:round;stroke-linecap:round}}",
         f".dot{{fill:{colors['line']};stroke:{colors['dot_outline']};stroke-width:1.4;filter:url(#glow)}}.cursor{{stroke:{colors['amber']};stroke-width:1.7;filter:url(#glow)}}.cell{{stroke:{colors['grid']};stroke-width:.6}}",
         f".preview-cursor{{opacity:.55}}.axis{{stroke:{colors['axis']};stroke-width:1}}.axis-tick{{stroke:{colors['axis']};stroke-width:1}}.bezel-highlight{{stroke:{colors['highlight']};stroke-width:.6;opacity:.55}}",
@@ -103,10 +105,8 @@ def render_svg(layout: StatsLayout, schedule, theme: str = "dark") -> str:
     for i in range(n+1):
         x = left + i*step
         _el(root, "line", x1=x, x2=x, y1=plot_top, y2=plot_bottom, **{"class":"grid", "opacity":".6"})
-    _el(root, "path", d=area, **{"class":"wave-area", "clip-path":"url(#plot-clip)"})
-    _el(root, "path", d=line, **{"class":"wave-preview", "clip-path":"url(#plot-clip)"})
-    # One shared animated clip reveals the waveform and its fill in sync with the calendar scanner.
-    reveal = _el(root, "g", id="revealed-wave", **{"clip-path":"url(#scan-clip)"})
+    # Reveal the graph only as the scanner passes; the rest stays blank.
+    reveal = _el(root, "g", id="revealed-wave", **{"clip-path":"url(#wave-clip)"})
     _el(reveal, "path", d=area, **{"class":"wave-area"})
     _el(reveal, "path", d=line, **{"class":"wave-line"})
 
@@ -140,7 +140,7 @@ def render_svg(layout: StatsLayout, schedule, theme: str = "dark") -> str:
     dot = _el(root, "circle", id="scan-dot", cx=(xs[-1] if xs else left), cy=(ys[-1] if ys else plot_bottom), r=5.2, **{"class":"dot"})
 
     scan = list(schedule.steps)
-    cursor_frames, reveal_frames, dot_frames = [], [], []
+    cursor_frames, reveal_frames, wave_frames, dot_frames = [], [], [], []
     for step_item in scan:
         i = step_item.week.index
         if i >= len(xs):
@@ -148,19 +148,24 @@ def render_svg(layout: StatsLayout, schedule, theme: str = "dark") -> str:
         percent = max(0, min(100, step_item.at_seconds/duration*100))
         cursor_frames.append((percent, f"transform:translate({xs[i]:.2f}px,0)"))
         reveal_frames.append((percent, f"width:{min(right-left,xs[i]-left+step*.38):.2f}px"))
+        wave_frames.append((percent, f"width:{max(0,xs[i]-left):.2f}px"))
         dot_frames.append((percent, f"cx:{xs[i]:.2f}px;cy:{ys[i]:.2f}px"))
     if scan and xs:
         first_x = xs[scan[0].week.index]
         last_x = xs[scan[-1].week.index]
         cursor_frames.insert(0, (0, f"transform:translate({first_x:.2f}px,0)"))
         reveal_frames.insert(0, (0, f"width:{min(right-left,first_x-left+step*.38):.2f}px"))
+        wave_frames.insert(0, (0, f"width:{max(0,first_x-left):.2f}px"))
         dot_frames.insert(0, (0, f"cx:{first_x:.2f}px;cy:{ys[scan[0].week.index]:.2f}px"))
         cursor_frames.extend([(100, f"transform:translate({last_x:.2f}px,0)")])
         reveal_frames.extend([(100, f"width:{right-left}px")])
+        wave_frames.extend([(100, f"width:{max(0,last_x-left):.2f}px")])
         dot_frames.append((100, f"cx:{last_x:.2f}px;cy:{ys[scan[-1].week.index]:.2f}px"))
-        css.extend([_frames("scan-cursor", cursor_frames), _frames("scan-dot", dot_frames), f"#scanner{{animation:scan-cursor {duration:g}s linear infinite}}", f"#scan-dot{{animation:scan-dot {duration:g}s linear infinite}}", f"#scan-clip rect{{animation:scan-width {duration:g}s linear infinite}}"])
+        css.extend([_frames("scan-cursor", cursor_frames), _frames("scan-dot", dot_frames), f"#scanner{{animation:scan-cursor {duration:g}s linear infinite}}", f"#scan-dot{{animation:scan-dot {duration:g}s linear infinite}}", f"#scan-clip rect{{animation:scan-width {duration:g}s linear infinite}}", f"#wave-clip rect{{animation:wave-width {duration:g}s linear infinite}}"])
         width_frames = [(p, f"width:{v.split(':',1)[1][:-2]}px") for p,v in reveal_frames]
         css.append(_frames("scan-width", width_frames))
+        wave_width_frames = [(p, f"width:{v.split(':',1)[1][:-2]}px") for p,v in wave_frames]
+        css.append(_frames("wave-width", wave_width_frames))
     axis_y = rows_top+7*row_pitch+8
     _el(root, "line", x1=left, x2=right, y1=axis_y, y2=axis_y, **{"class": "axis"})
     for i in range(n):
@@ -170,6 +175,6 @@ def render_svg(layout: StatsLayout, schedule, theme: str = "dark") -> str:
             _el(root, "text", x=x, y=axis_y+19, text_anchor="middle", font_size=9, **{"class":"muted"}).text = str(i+1)
     css.append(".cursor-static{stroke:" + colors["amber"] + ";stroke-width:1.7;opacity:.8}")
     css.append("@media(prefers-reduced-motion:no-preference){.cursor-static{display:none}}")
-    css.append("@media(prefers-reduced-motion:reduce){#scanner,#scan-dot,#scan-clip rect{animation:none!important}}")
+    css.append("@media(prefers-reduced-motion:reduce){#scanner,#scan-dot,#scan-clip rect,#wave-clip rect{animation:none!important}}")
     style.text = "\n".join(css)
     return ET.tostring(root, encoding="unicode", xml_declaration=True)

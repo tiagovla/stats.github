@@ -17,9 +17,9 @@ PALETTES = {
     },
     "activity": {
         "dark": {"bg": "#020b16", "panel": "#07182a", "border": "#07303b", "text": "#c8e3f1", "muted": "#9bb8c5", "accent": "#00d7e6", "track": "#173841", "rule": "#00a99f", "icon": "#bfdced"},
-        "light": {"bg": "#edf5f7", "panel": "#f8fcfd", "border": "#c8dfe4", "text": "#152d40", "muted": "#647e91", "accent": "#087f70", "track": "#dbe6ec", "rule": "#d7e2e9", "icon": "#087f70"},
-        "github-dark": {"bg": "#0d1117", "panel": "#161b22", "border": "#30363d", "text": "#e6edf3", "muted": "#8b949e", "accent": "#2f81f7", "track": "#21262d", "rule": "#30363d", "icon": "#79c0ff"},
-        "github-light": {"bg": "#ffffff", "panel": "#f6f8fa", "border": "#d0d7de", "text": "#1f2328", "muted": "#656d76", "accent": "#0969da", "track": "#eaeef2", "rule": "#d8dee4", "icon": "#0969da"},
-        "tokyodark": {"bg": "#11121d", "panel": "#1a1b2a", "border": "#3b4261", "text": "#a0a8cd", "muted": "#565f89", "accent": "#7aa2f7", "track": "#212234", "rule": "#38a89d", "icon": "#7dcfff"},
+        "light": {"bg": "#edf5f7", "panel": "#f8fcfd", "border": "#c8dfe4", "text": "#152d40", "muted": "#647e91", "accent": "#087f70", "track": "#dbe6ec", "rule": "#d7e2e9", "icon": "#000000"},
+        "github-dark": {"bg": "#0d1117", "panel": "#161b22", "border": "#30363d", "text": "#e6edf3", "muted": "#8b949e", "accent": "#2f81f7", "track": "#21262d", "rule": "#30363d", "icon": "#ffffff"},
+        "github-light": {"bg": "#ffffff", "panel": "#f6f8fa", "border": "#d0d7de", "text": "#1f2328", "muted": "#656d76", "accent": "#0969da", "track": "#eaeef2", "rule": "#d8dee4", "icon": "#000000"},
+        "tokyodark": {"bg": "#11121d", "panel": "#1a1b2a", "border": "#3b4261", "text": "#a0a8cd", "muted": "#565f89", "accent": "#7aa2f7", "track": "#212234", "rule": "#38a89d", "icon": "#a0a8cd"},
     },
 }
