@@ -13,3 +13,23 @@
 ![Contribution stats](https://tiagovla.github.io/stats.github/light/stats.svg)
 ![Language composition](https://tiagovla.github.io/stats.github/light/languages.svg)
 ![Developer activity](https://tiagovla.github.io/stats.github/light/activity.svg)
+
+## Use
+
+Copy [workflow.yml](workflow.yml) to `.github/workflows/stats.yml` in your profile repository. Set Pages source to GitHub Actions. The workflow uses the automatic `GITHUB_TOKEN` for public data; optionally add `STATS_TOKEN` for broader access. The workflow runs twice daily and can be started manually.
+
+Embed your generated cards, replacing `USER` and `REPO`:
+
+```md
+![Stats](https://USER.github.io/REPO/stats.svg)
+![Languages](https://USER.github.io/REPO/languages.svg)
+![Activity](https://USER.github.io/REPO/activity.svg)
+```
+
+To run locally:
+
+```sh
+python -m pip install 'git+https://github.com/tiagovla/stats.github.git'
+export GH_TOKEN=your_github_token
+python -m github_stats --username USER --output dist --theme dark
+```
