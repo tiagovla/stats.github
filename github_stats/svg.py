@@ -75,7 +75,7 @@ def render_svg(layout: StatsLayout, schedule, theme: str = "dark") -> str:
 
     style = _el(root, "style")
     css = [
-        f"svg{{font-family:system-ui,sans-serif;background:{colors['bg']};color:{colors['text']}}}",
+        f"svg{{font-family:system-ui,sans-serif;color:{colors['text']}}}",
         f".panel{{fill:url(#shell);stroke:url(#bezel);stroke-width:1.4}}.inset{{fill:url(#inset);stroke:{colors['bezel']};stroke-width:1.1}}.header{{fill:url(#shell);stroke:{colors['bezel']};stroke-width:1}}.grid{{stroke:{colors['grid']};stroke-width:.8}}",
         f".text{{fill:{colors['text']}}}.muted{{fill:{colors['muted']}}}.wave-preview{{fill:none;stroke:{colors['preview']};stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round}}",
         f".wave-area{{fill:{colors['area']};opacity:.16}}.wave-line{{fill:none;stroke:{colors['line']};stroke-width:2.3;stroke-linejoin:round;stroke-linecap:round}}",

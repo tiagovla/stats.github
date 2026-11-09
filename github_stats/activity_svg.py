@@ -49,7 +49,7 @@ def render_activity_svg(data, rank, theme="dark", example=False):
     if example:
         description += " Synthetic example data."
     _el(root, "desc", id="desc").text = description
-    _el(root, "style").text = f"svg{{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:{colors['bg']}}}.text{{fill:{colors['text']}}}.muted{{fill:{colors['muted']}}}.accent{{fill:{colors['accent']}}}.rule{{stroke:{colors['rule']}}}.icon{{fill:none;stroke:{colors['icon']};stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}}.header{{font-weight:700}}"
+    _el(root, "style").text = f"svg{{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}}.text{{fill:{colors['text']}}}.muted{{fill:{colors['muted']}}}.accent{{fill:{colors['accent']}}}.rule{{stroke:{colors['rule']}}}.icon{{fill:none;stroke:{colors['icon']};stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}}.header{{font-weight:700}}"
     _el(root, "rect", x=8, y=8, width=width-16, height=height-16, rx=14, fill=colors["panel"], stroke=colors["border"], stroke_width=1)
     _el(root, "text", x=66, y=60, font_size=25, letter_spacing=.4, **{"class": "text header"}).text = "DEVELOPER ACTIVITY / OVERVIEW"
 

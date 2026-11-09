@@ -67,7 +67,7 @@ def render_language_svg(languages, theme: str = "dark") -> str:
     _el(root, "desc", id="desc").text = desc
     _el(root, "rect", x=8, y=8, width=width-16, height=height-16, rx=14, fill=colors["panel"], stroke=colors["border"])
     style = _el(root, "style")
-    style.text = f"svg{{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:{colors['bg']}}}"
+    style.text = f"svg{{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}}"
     _el(root, "text", x=32, y=42, font_size=16, letter_spacing=2, fill=colors["text"]).text = "LANGUAGE CODE COMPOSITION"
     _el(root, "text", x=bar_x, y=65, font_size=9, fill=colors["muted"]).text = "0%"
     _el(root, "text", x=bar_x+bar_width, y=65, text_anchor="end", font_size=9, fill=colors["muted"]).text = "100%"
