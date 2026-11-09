@@ -307,9 +307,7 @@ def fetch_activity(username, token=None, *, end_date=None, all_commits=False, in
     issues = _search_count("issues", f"author:{username} created:{date_filter} is:issue", "issue count", search_token)
     repositories = _all_time_repositories(username, stats["years"], stats["created"], end_date, include_private, token)
     stars_as_of = datetime.now(timezone.utc).date()
-    rank_allowed = end_date == stars_as_of and (
-        include_private or (stats["private_owned"] == 0 and not stats["restricted"])
-    )
+    rank_allowed = end_date == stars_as_of
     rank_commits = _search_count("commits", f"author:{username}", "all-time commit count", search_token) if rank_allowed and all_commits else stats["rank_commits"]
     rank_inputs = None
     if rank_allowed:
