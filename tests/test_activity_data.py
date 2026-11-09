@@ -134,6 +134,19 @@ def test_private_data_requires_matching_viewer_and_public_keeps_rank_unavailable
     assert activity["commits"] == activity["pull_requests"] == activity["issues"] == 0
 
 
+def test_unrelated_viewer_private_repositories_do_not_hide_public_rank(monkeypatch):
+    today = datetime.now(timezone.utc).date()
+    def post(_, **kwargs):
+        if "RepositoriesContributedTo" in kwargs["json"]["query"]:
+            return Response(repo_range())
+        return Response(info(private_access=1))
+    monkeypatch.setattr(data.requests, "post", post)
+    monkeypatch.setattr(data.requests, "get", lambda *args, **kwargs: Response({"total_count": 0, "incomplete_results": False}))
+    activity = data.fetch_activity("octocat", "token", end_date=today)
+    assert activity["rank_inputs"] is not None
+    assert activity["rank_inputs"]["commits"] == 55
+
+
 def test_repository_range_splits_saturated_year_and_deduplicates(monkeypatch):
     calls = []
 
