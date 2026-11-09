@@ -18,7 +18,7 @@
 
 Copy [workflow.yml](workflow.yml) to `.github/workflows/stats.yml` in your profile repository. Set Pages source to GitHub Actions. The workflow uses the automatic `GITHUB_TOKEN` for public data; optionally add `STATS_TOKEN` for broader access. The workflow runs twice daily and can be started manually.
 
-Embed your generated cards, replacing `USER` and `REPO`:
+Embed your generated cards, replacing `USER` and `REPO`. Add `-dark` before `.svg` for the dark style:
 
 ```md
 ![Stats](https://USER.github.io/REPO/stats.svg)
