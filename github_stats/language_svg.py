@@ -67,7 +67,12 @@ def render_language_svg(languages, theme: str = "dark") -> str:
     _el(root, "desc", id="desc").text = desc
     _el(root, "rect", x=8, y=8, width=width-16, height=height-16, rx=14, fill=colors["panel"], stroke=colors["border"])
     style = _el(root, "style")
-    style.text = f"svg{{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}}"
+    style.text = """svg{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+@keyframes appear{from{opacity:0}to{opacity:1}}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.language-row{animation:appear .4s ease both;animation-delay:calc(var(--i) * .12s)}
+.language-bar{transform-box:fill-box;transform-origin:left;animation:grow .7s ease both;animation-delay:calc(var(--i) * .12s)}
+@media(prefers-reduced-motion:reduce){.language-row,.language-bar{animation:none!important}}"""
     _el(root, "text", x=32, y=42, font_size=16, letter_spacing=2, fill=colors["text"]).text = "LANGUAGE CODE COMPOSITION"
     _el(root, "text", x=bar_x, y=65, font_size=9, fill=colors["muted"]).text = "0%"
     _el(root, "text", x=bar_x+bar_width, y=65, text_anchor="end", font_size=9, fill=colors["muted"]).text = "100%"
@@ -75,19 +80,20 @@ def render_language_svg(languages, theme: str = "dark") -> str:
         _el(root, "text", x=32, y=top+20, font_size=13, fill=colors["muted"]).text = "No language data available"
     for index, (name, percentage) in enumerate(rows):
         y = top + index * row_height
-        _el(root, "line", x1=label_x, x2=930, y1=y+row_height-2, y2=y+row_height-2, stroke=colors["grid"], **{"stroke-width": ".6"})
-        label = _el(root, "text", x=label_x, y=y+15, font_size=12, fill=colors["text"])
+        row = _el(root, "g", style=f"--i:{index}", **{"class": "language-row"})
+        _el(row, "line", x1=label_x, x2=930, y1=y+row_height-2, y2=y+row_height-2, stroke=colors["grid"], **{"stroke-width": ".6"})
+        label = _el(row, "text", x=label_x, y=y+15, font_size=12, fill=colors["text"])
         _el(label, "title").text = name
         label.text = _label(name)
-        _el(root, "rect", x=bar_x, y=y+3, width=bar_width, height=12, rx=6, fill=colors["track"])
+        _el(row, "rect", x=bar_x, y=y+3, width=bar_width, height=12, rx=6, fill=colors["track"])
         for tick in (25, 50, 75):
-            _el(root, "line", x1=bar_x+bar_width*tick/100, x2=bar_x+bar_width*tick/100, y1=y+3, y2=y+15, stroke=colors["grid"], **{"stroke-width": ".6"})
+            _el(row, "line", x1=bar_x+bar_width*tick/100, x2=bar_x+bar_width*tick/100, y1=y+3, y2=y+15, stroke=colors["grid"], **{"stroke-width": ".6"})
         if percentage:
             fill_width = bar_width*percentage/100
-            _el(root, "rect", x=bar_x, y=y+3, width=f"{fill_width:.3f}", height=12, rx=6, fill=LANGUAGE_COLORS.get(name, "#8b9aa8"))
+            _el(row, "rect", x=bar_x, y=y+3, width=f"{fill_width:.3f}", height=12, rx=6, fill=LANGUAGE_COLORS.get(name, "#8b9aa8"), **{"class": "language-bar"})
         else:
             fill_width = 0
         pct_label = "<0.1%" if 0 < percentage < 0.1 else f"{percentage:.1f}%"
         inside = percentage >= 82
-        _el(root, "text", x=(bar_x+fill_width-8 if inside else min(bar_x+fill_width+8, pct_x)), y=y+14, text_anchor=("end" if inside else "start"), font_size=10, fill=(colors["panel"] if inside else colors["text"])).text = pct_label
+        _el(row, "text", x=(bar_x+fill_width-8 if inside else min(bar_x+fill_width+8, pct_x)), y=y+14, text_anchor=("end" if inside else "start"), font_size=10, fill=(colors["panel"] if inside else colors["text"])).text = pct_label
     return ET.tostring(root, encoding="unicode", xml_declaration=True)

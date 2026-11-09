@@ -49,7 +49,7 @@ def render_activity_svg(data, rank, theme="dark", example=False):
     if example:
         description += " Synthetic example data."
     _el(root, "desc", id="desc").text = description
-    _el(root, "style").text = f"svg{{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}}.text{{fill:{colors['text']}}}.muted{{fill:{colors['muted']}}}.accent{{fill:{colors['accent']}}}.rule{{stroke:{colors['rule']}}}.icon{{fill:none;stroke:{colors['icon']};stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}}.header{{font-weight:700}}"
+    _el(root, "style").text = f"svg{{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}}.text{{fill:{colors['text']}}}.muted{{fill:{colors['muted']}}}.accent{{fill:{colors['accent']}}}.rule{{stroke:{colors['rule']}}}.icon{{fill:none;stroke:{colors['icon']};stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}}.header{{font-weight:700}}@keyframes appear{{from{{opacity:0}}to{{opacity:1}}}}@keyframes draw{{from{{stroke-dasharray:0 1000}}}}.metric{{animation:appear .4s ease both;animation-delay:calc(var(--i) * .15s)}}.rank-arc{{animation:draw 1s ease both}}@media(prefers-reduced-motion:reduce){{.metric,.rank-arc{{animation:none!important}}}}"
     _el(root, "rect", x=8, y=8, width=width-16, height=height-16, rx=14, fill=colors["panel"], stroke=colors["border"], stroke_width=1)
     _el(root, "text", x=66, y=60, font_size=25, letter_spacing=.4, **{"class": "text header"}).text = "DEVELOPER ACTIVITY / OVERVIEW"
 
@@ -57,7 +57,7 @@ def render_activity_svg(data, rank, theme="dark", example=False):
     cx, cy, radius = 155, 194, 99
     circumference = 2 * math.pi * radius
     _el(root, "circle", cx=cx, cy=cy, r=radius, fill="none", stroke=colors["track"], **{"stroke-width": 8})
-    _el(root, "circle", cx=cx, cy=cy, r=radius, fill="none", stroke=colors["accent"] if rank is not None else "none", stroke_width=8, stroke_dasharray=f"{circumference*(1-percentile/100):.2f} {circumference:.2f}", transform=f"rotate(-90 {cx} {cy})", **{"stroke-linecap": "round"})
+    _el(root, "circle", cx=cx, cy=cy, r=radius, fill="none", stroke=colors["accent"] if rank is not None else "none", **{"class": "rank-arc"}, stroke_width=8, stroke_dasharray=f"{circumference*(1-percentile/100):.2f} {circumference:.2f}", transform=f"rotate(-90 {cx} {cy})", **{"stroke-linecap": "round"})
     _el(root, "text", x=cx, y=cy+18, text_anchor="middle", font_size=65 if rank is not None else 32, font_weight=700, **{"class": "accent" if rank is not None else "text"}).text = level.strip().upper()
     _el(root, "text", x=cx, y=cy+48, text_anchor="middle", font_size=13, letter_spacing=1.1, **{"class": "text"}).text = "ACTIVITY GRADE" if rank is not None else "UNAVAILABLE"
 
@@ -73,9 +73,10 @@ def render_activity_svg(data, rank, theme="dark", example=False):
     for index, (x, (label, value, icon)) in enumerate(zip(x_positions, metrics)):
         if index:
             _el(root, "line", x1=x-88, x2=x-88, y1=94, y2=299, **{"class": "rule", "stroke-width": 1.5})
-        _el(root, "path", d=paths[icon], transform=f"translate({x-30} 98) scale(2.5)", **{"class": "icon", "stroke-width": "1.25"})
-        _el(root, "text", x=x, y=216, text_anchor="middle", font_size=42, font_weight=650, textLength=min(154, len(f"{value:,}") * 24), lengthAdjust="spacingAndGlyphs", **{"class": "accent"}).text = f"{value:,}"
-        label_node = _el(root, "text", x=x, y=248 if icon in ("pull", "issue", "repo") else 252, text_anchor="middle", font_size=14 if icon == "repo" else 16, letter_spacing=.3, **{"class": "text"})
+        metric = _el(root, "g", style=f"--i:{index}", **{"class": "metric"})
+        _el(metric, "path", d=paths[icon], transform=f"translate({x-30} 98) scale(2.5)", **{"class": "icon", "stroke-width": "1.25"})
+        _el(metric, "text", x=x, y=216, text_anchor="middle", font_size=42, font_weight=650, textLength=min(154, len(f"{value:,}") * 24), lengthAdjust="spacingAndGlyphs", **{"class": "accent"}).text = f"{value:,}"
+        label_node = _el(metric, "text", x=x, y=248 if icon in ("pull", "issue", "repo") else 252, text_anchor="middle", font_size=14 if icon == "repo" else 16, letter_spacing=.3, **{"class": "text"})
         first, second = {
             "star": ("CURRENT STARS", None), "commit": ("TOTAL COMMITS", None),
             "pull": ("TOTAL PULL", "REQUESTS"), "issue": ("TOTAL ISSUES", "OPENED"),
