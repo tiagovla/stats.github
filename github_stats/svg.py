@@ -7,15 +7,14 @@ import xml.etree.ElementTree as ET
 
 from .aggregation import weekly_totals, waveform_y
 from .layout import StatsLayout
+from .themes import PALETTES as THEME_PALETTES
+
 
 
 SVG = "http://www.w3.org/2000/svg"
 ET.register_namespace("", SVG)
 
-PALETTES = {
-    "dark": {"bg": "#020b16", "panel": "#07182a", "inner": "#00101b", "bezel": "#253b53", "grid": "#07303b", "text": "#a9e2ed", "muted": "#75a9b8", "line": "#0df4f0", "area": "#00c5b2", "preview": "#285b6d", "cell": "#061e29", "levels": ("#06402f", "#07854d", "#00b95c", "#00f56d"), "amber": "#ffc34e"},
-    "light": {"bg": "#edf5f7", "panel": "#f8fcfd", "inner": "#f3fafb", "bezel": "#b3c9d2", "grid": "#c8dfe4", "text": "#17424b", "muted": "#66858d", "line": "#008e9a", "area": "#00a99f", "preview": "#9dbdc5", "cell": "#e1eeeb", "levels": ("#d6ece2", "#8ad5ad", "#28b976", "#008d57"), "amber": "#be7410"},
-}
+PALETTES = THEME_PALETTES["stats"]
 
 
 def _el(parent, name, **attrs):
@@ -35,7 +34,7 @@ def _frames(name: str, points: list[tuple[float, str]]) -> str:
 def render_svg(layout: StatsLayout, schedule, theme: str = "dark") -> str:
     """Return responsive, standalone SVG; schedule positions the shared scanner."""
     if theme not in PALETTES:
-        raise ValueError(f"unknown theme {theme!r}; expected 'dark' or 'light'")
+        raise ValueError(f"unknown theme {theme!r}; expected one of {', '.join(PALETTES)}")
     colors = PALETTES[theme]
     width, height = 1200, 400
     left, right = 72, 1168
@@ -64,10 +63,10 @@ def render_svg(layout: StatsLayout, schedule, theme: str = "dark") -> str:
     _el(inset, "stop", offset="0", **{"stop-color": colors["inner"]})
     _el(inset, "stop", offset="1", **{"stop-color": colors["bg"]})
     bezel = _el(defs, "linearGradient", id="bezel", x1="0", y1="0", x2="0", y2="1")
-    _el(bezel, "stop", offset="0", **{"stop-color": "#61758a"})
+    _el(bezel, "stop", offset="0", **{"stop-color": colors["bezel_hi"]})
     _el(bezel, "stop", offset=".12", **{"stop-color": colors["bezel"]})
     _el(bezel, "stop", offset=".88", **{"stop-color": colors["bezel"]})
-    _el(bezel, "stop", offset="1", **{"stop-color": "#0b192a"})
+    _el(bezel, "stop", offset="1", **{"stop-color": colors["bezel_lo"]})
     clip = _el(defs, "clipPath", id="plot-clip")
     _el(clip, "rect", x=left, y=plot_top, width=right-left, height=plot_bottom-plot_top)
     scan_clip = _el(defs, "clipPath", id="scan-clip", clipPathUnits="userSpaceOnUse")
@@ -79,8 +78,8 @@ def render_svg(layout: StatsLayout, schedule, theme: str = "dark") -> str:
         f".panel{{fill:url(#shell);stroke:url(#bezel);stroke-width:1.4}}.inset{{fill:url(#inset);stroke:{colors['bezel']};stroke-width:1.1}}.header{{fill:url(#shell);stroke:{colors['bezel']};stroke-width:1}}.grid{{stroke:{colors['grid']};stroke-width:.8}}",
         f".text{{fill:{colors['text']}}}.muted{{fill:{colors['muted']}}}.wave-preview{{fill:none;stroke:{colors['preview']};stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round}}",
         f".wave-area{{fill:{colors['area']};opacity:.16}}.wave-line{{fill:none;stroke:{colors['line']};stroke-width:2.3;stroke-linejoin:round;stroke-linecap:round}}",
-        f".dot{{fill:{colors['line']};stroke:#d2ffff;stroke-width:1.4;filter:url(#glow)}}.cursor{{stroke:{colors['amber']};stroke-width:1.7;filter:url(#glow)}}.cell{{stroke:{colors['grid']};stroke-width:.6}}",
-        ".preview-cursor{opacity:.55}.axis{stroke:#5596aa;stroke-width:1}.axis-tick{stroke:#5596aa;stroke-width:1}.bezel-highlight{stroke:#9aafc1;stroke-width:.6;opacity:.55}",
+        f".dot{{fill:{colors['line']};stroke:{colors['dot_outline']};stroke-width:1.4;filter:url(#glow)}}.cursor{{stroke:{colors['amber']};stroke-width:1.7;filter:url(#glow)}}.cell{{stroke:{colors['grid']};stroke-width:.6}}",
+        f".preview-cursor{{opacity:.55}}.axis{{stroke:{colors['axis']};stroke-width:1}}.axis-tick{{stroke:{colors['axis']};stroke-width:1}}.bezel-highlight{{stroke:{colors['highlight']};stroke-width:.6;opacity:.55}}",
     ]
     glow = _el(defs, "filter", id="glow", x="-150%", y="-150%", width="400%", height="400%")
     _el(glow, "feGaussianBlur", stdDeviation="2.2", result="blur")
@@ -88,7 +87,7 @@ def render_svg(layout: StatsLayout, schedule, theme: str = "dark") -> str:
     _el(merge, "feMergeNode", **{"in": "blur"})
     _el(merge, "feMergeNode", **{"in": "SourceGraphic"})
 
-    _el(root, "rect", x=8, y=8, width=width-16, height=height-16, rx=14, fill=colors["panel"], stroke=colors["grid"], **{"stroke-width": "1"})
+    _el(root, "rect", x=8, y=8, width=width-16, height=height-16, rx=14, fill=colors["panel"], stroke=THEME_PALETTES["activity"][theme]["border"], **{"stroke-width": "1"})
     _el(root, "text", x=28, y=37, font_size=16, letter_spacing=2, **{"class": "text"}).text = "WEEKLY CONTRIBUTIONS  /  DAILY ACTIVITY"
     _el(root, "text", x=width-30, y=37, text_anchor="end", font_size=10, letter_spacing=2, **{"class": "muted"}).text = "GITHUB STATS"
     _el(root, "text", x=left, y=70, font_size=12, letter_spacing=1.6, **{"class": "text"}).text = "WEEKLY CONTRIBUTIONS"

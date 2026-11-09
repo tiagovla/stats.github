@@ -23,8 +23,9 @@ jobs:
         run: |
           mkdir -p _site
           cp .github/pages/index.html _site/index.html
-          python -m github_stats --fixture fixtures --output _site/dark --theme dark
-          python -m github_stats --fixture fixtures --output _site/light --theme light
+          for theme in dark light github-dark github-light tokyodark; do
+            python -m github_stats --fixture fixtures --output "_site/$theme" --theme "$theme"
+          done
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

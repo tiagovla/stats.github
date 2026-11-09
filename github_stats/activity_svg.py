@@ -4,15 +4,13 @@ from __future__ import annotations
 
 import math
 import xml.etree.ElementTree as ET
+from .themes import PALETTES as THEME_PALETTES
 
 
 SVG = "http://www.w3.org/2000/svg"
 ET.register_namespace("", SVG)
 
-PALETTES = {
-    "dark": {"bg": "#020b16", "panel": "#07182a", "border": "#07303b", "text": "#c8e3f1", "muted": "#9bb8c5", "accent": "#00d7e6", "track": "#173841", "rule": "#00a99f", "icon": "#bfdced"},
-    "light": {"bg": "#edf5f7", "panel": "#f8fcfd", "border": "#c8dfe4", "text": "#152d40", "muted": "#647e91", "accent": "#087f70", "track": "#dbe6ec", "rule": "#d7e2e9", "icon": "#087f70"},
-}
+PALETTES = THEME_PALETTES["activity"]
 
 
 def _el(parent, name, **attrs):
@@ -22,7 +20,7 @@ def _el(parent, name, **attrs):
 def render_activity_svg(data, rank, theme="dark", example=False):
     """Render lifetime activity metrics and a percentile rank badge."""
     if theme not in PALETTES:
-        raise ValueError(f"unknown theme {theme!r}; expected 'dark' or 'light'")
+        raise ValueError(f"unknown theme {theme!r}; expected one of {', '.join(PALETTES)}")
     colors = PALETTES[theme]
     metrics = (("CURRENT STARS", data["stars"], "star"),
                ("TOTAL COMMITS", data["commits"], "commit"),

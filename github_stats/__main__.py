@@ -45,7 +45,7 @@ def main(argv=None):
     source.add_argument("--fixture", type=Path, help="fixture directory (or legacy contribution fixture file)")
     parser.add_argument("-o", "--output", type=Path, default=Path("."), help="output directory (default: current directory)")
     parser.add_argument("--duration", type=_positive_duration, default=20.0, help="stats animation duration in seconds")
-    parser.add_argument("--theme", choices=("dark", "light"), default="dark", help="SVG color theme")
+    parser.add_argument("--theme", choices=("dark", "light", "github-dark", "github-light", "tokyodark"), default="dark", help="SVG color theme")
     parser.add_argument("--end-date", type=date.fromisoformat, help="activity reporting end date (YYYY-MM-DD, UTC)")
     parser.add_argument("--all-commits", action="store_true", help="use upstream all-commits activity rank mode")
     parser.add_argument("--include-private", action="store_true", help="include private data where available")

@@ -16,7 +16,7 @@ def main(argv=None):
     source.add_argument("--username", help="GitHub username")
     source.add_argument("--fixture", type=Path, help="JSON activity fixture")
     parser.add_argument("-o", "--output", type=Path, default=Path("activity.svg"))
-    parser.add_argument("--theme", choices=("dark", "light"), default="dark")
+    parser.add_argument("--theme", choices=("dark", "light", "github-dark", "github-light", "tokyodark"), default="dark")
     parser.add_argument("--end-date", type=date.fromisoformat, help="inclusive reporting end date (YYYY-MM-DD, UTC)")
     parser.add_argument("--all-commits", action="store_true", help="use the upstream all-commits ranking mode")
     parser.add_argument("--include-private", action="store_true", help="include private activity where available")

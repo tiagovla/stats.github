@@ -35,7 +35,7 @@ def main(argv=None):
     source.add_argument("--username", help="GitHub username")
     source.add_argument("--fixture", type=Path, help="JSON object mapping language names to byte counts")
     parser.add_argument("-o", "--output", type=Path, default=Path("languages.svg"), help="output SVG path")
-    parser.add_argument("--theme", choices=("dark", "light"), default="dark", help="SVG color theme")
+    parser.add_argument("--theme", choices=("dark", "light", "github-dark", "github-light", "tokyodark"), default="dark", help="SVG color theme")
     parser.add_argument("--top", type=_positive_int, default=7, help="number of languages to show")
     parser.add_argument("--include", action="append", default=[], metavar="REPOSITORY", help="include only this repository (repeatable)")
     parser.add_argument("--exclude", action="append", default=[], metavar="REPOSITORY", help="exclude this repository (repeatable)")

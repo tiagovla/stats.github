@@ -1,8 +1,7 @@
-# Generate both themes and a local HTML preview under /tmp.
+# Generate all styles with fixture data under /tmp.
 preview:
     mkdir -p /tmp/github-stats-preview
-    python3 -m github_stats --fixture fixtures --output /tmp/github-stats-preview/dark --theme dark
-    python3 -m github_stats --fixture fixtures --output /tmp/github-stats-preview/light --theme light
+    for theme in dark light github-dark github-light tokyodark; do python3 -m github_stats --fixture fixtures --output "/tmp/github-stats-preview/$theme" --theme "$theme"; done
     cp .github/pages/index.html /tmp/github-stats-preview/index.html
     @echo 'Preview: /tmp/github-stats-preview/index.html'
 

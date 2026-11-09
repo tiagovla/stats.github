@@ -5,14 +5,13 @@ from __future__ import annotations
 import math
 import xml.etree.ElementTree as ET
 
+from .themes import PALETTES as THEME_PALETTES
+
 
 SVG = "http://www.w3.org/2000/svg"
 ET.register_namespace("", SVG)
 
-PALETTES = {
-    "dark": {"bg": "#020b16", "panel": "#07182a", "track": "#00101b", "border": "#253b53", "grid": "#123142", "text": "#a9e2ed", "muted": "#75a9b8"},
-    "light": {"bg": "#edf5f7", "panel": "#f8fcfd", "track": "#e1eeeb", "border": "#b3c9d2", "grid": "#d4e5e9", "text": "#17424b", "muted": "#66858d"},
-}
+PALETTES = THEME_PALETTES["language"]
 
 # GitHub Linguist colors for common languages; unknown languages use a neutral tone.
 LANGUAGE_COLORS = {
@@ -36,7 +35,7 @@ def _label(name: str, limit: int = 12) -> str:
 def render_language_svg(languages, theme: str = "dark") -> str:
     """Return an accessible, static SVG for (language name, actual percent) pairs."""
     if theme not in PALETTES:
-        raise ValueError(f"unknown theme {theme!r}; expected 'dark' or 'light'")
+        raise ValueError(f"unknown theme {theme!r}; expected one of {', '.join(PALETTES)}")
     rows = []
     for item in languages:
         try:
@@ -65,7 +64,7 @@ def render_language_svg(languages, theme: str = "dark") -> str:
     else:
         desc = "No language data is available."
     _el(root, "desc", id="desc").text = desc
-    _el(root, "rect", x=8, y=8, width=width-16, height=height-16, rx=14, fill=colors["panel"], stroke=colors["border"])
+    _el(root, "rect", x=8, y=8, width=width-16, height=height-16, rx=14, fill=colors["panel"], stroke=THEME_PALETTES["activity"][theme]["border"], stroke_width=1)
     style = _el(root, "style")
     style.text = """svg{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
 @keyframes appear{from{opacity:0}to{opacity:1}}
@@ -83,7 +82,7 @@ def render_language_svg(languages, theme: str = "dark") -> str:
     for index, (name, percentage) in enumerate(rows):
         y = top + index * row_height
         row = _el(root, "g", style=f"--i:{index}", **{"class": "language-row"})
-        color = LANGUAGE_COLORS.get(name, "#8b9aa8")
+        color = LANGUAGE_COLORS.get(name, colors["unknown"])
         _el(row, "rect", x=34, y=y+3, width=19, height=19, rx=4, fill=color)
         label = _el(row, "text", x=label_x, y=y+20, font_size=18, fill=colors["text"])
         _el(label, "title").text = name

@@ -3,6 +3,12 @@ on:
   schedule:
     - cron: '0 0,12 * * *'
   workflow_dispatch:
+    inputs:
+      theme:
+        description: Color theme
+        type: choice
+        options: [dark, light, github-dark, github-light, tokyodark]
+        default: dark
 permissions:
   contents: read
   pages: write
@@ -24,12 +30,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.STATS_TOKEN || github.token }}
           OWNER: ${{ github.repository_owner }}
-        run: |
-          python -m github_stats --username "$OWNER" --output /tmp/github-stats-dark --theme dark
-          python -m github_stats --username "$OWNER" --output generated --theme light
-          for name in stats languages activity; do
-            cp "/tmp/github-stats-dark/$name.svg" "generated/$name-dark.svg"
-          done
+          THEME: ${{ inputs.theme || 'dark' }}
+        run: python -m github_stats --username "$OWNER" --output generated --theme "$THEME"
       - uses: actions/upload-pages-artifact@v3
         with:
           path: generated
