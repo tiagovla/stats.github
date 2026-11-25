@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import math
 import xml.etree.ElementTree as ET
+from itertools import pairwise
 
 from .aggregation import weekly_totals, waveform_y
 from .layout import StatsLayout
@@ -43,6 +44,16 @@ def render_svg(layout: StatsLayout, schedule, theme: str = "dark") -> str:
     n = max(1, len(layout.weeks))
     step = (right - left) / n
     totals = weekly_totals(layout)
+    days = layout.days
+    recent_days = days[-7:]
+    rolling_latest = (
+        len(recent_days) == 7
+        and recent_days[-1].week == len(totals) - 1
+        and recent_days[-1].weekday < 6
+        and all((current.date - previous.date).days == 1 for previous, current in pairwise(recent_days))
+    )
+    if rolling_latest:
+        totals = (*totals[:-1], sum(day.count for day in recent_days))
     ys = waveform_y(totals, plot_top, plot_bottom)
     xs = [left + (i + .5) * step for i in range(len(totals))]
     line = _path(list(zip(xs, ys)))
@@ -53,8 +64,15 @@ def render_svg(layout: StatsLayout, schedule, theme: str = "dark") -> str:
 
     root = ET.Element(f"{{{SVG}}}svg", {"width": str(width), "height": str(height), "viewBox": f"0 0 {width} {height}", "role": "img", "aria-labelledby": "title desc", "preserveAspectRatio": "xMidYMid meet"})
     _el(root, "title", id="title").text = "Weekly contributions and daily activity"
-    summary = ", ".join(f"{day.date.isoformat()}: {day.count} contributions" for day in layout.days)
-    _el(root, "desc", id="desc").text = (f"Weekly contribution totals and a Sunday through Saturday daily activity calendar for {len(layout.days)} days. " + summary) if summary else "An empty weekly contribution chart and daily activity calendar."
+    desc = _el(root, "desc", id="desc")
+    if days:
+        summary = ", ".join(f"{day.date.isoformat()}: {day.count} contributions" for day in days)
+        desc.text = f"Weekly contribution totals and a Sunday through Saturday daily activity calendar for {len(days)} days. "
+        if rolling_latest:
+            desc.text += "The latest point shows contributions from the last seven days. "
+        desc.text += summary
+    else:
+        desc.text = "An empty weekly contribution chart and daily activity calendar."
     defs = _el(root, "defs")
     shell = _el(defs, "linearGradient", id="shell", x1="0", y1="0", x2="0", y2="1")
     _el(shell, "stop", offset="0", **{"stop-color": colors["panel"]})
@@ -93,6 +111,8 @@ def render_svg(layout: StatsLayout, schedule, theme: str = "dark") -> str:
     _el(root, "text", x=28, y=37, font_size=16, letter_spacing=2, **{"class": "text"}).text = "WEEKLY CONTRIBUTIONS  /  DAILY ACTIVITY"
     _el(root, "text", x=width-30, y=37, text_anchor="end", font_size=10, letter_spacing=2, **{"class": "muted"}).text = "GITHUB STATS"
     _el(root, "text", x=left, y=70, font_size=12, letter_spacing=1.6, **{"class": "text"}).text = "WEEKLY CONTRIBUTIONS"
+    if rolling_latest:
+        _el(root, "text", x=right, y=70, text_anchor="end", font_size=10, **{"class": "muted"}).text = "LATEST POINT · LAST 7 DAYS"
     _el(root, "text", x=left, y=234, font_size=12, letter_spacing=1.6, **{"class": "text"}).text = "DAILY ACTIVITY"
 
     maximum = max(totals, default=0)

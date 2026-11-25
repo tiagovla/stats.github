@@ -1,3 +1,4 @@
+from datetime import date, timedelta
 import xml.etree.ElementTree as ET
 
 import pytest
@@ -53,6 +54,28 @@ def test_wave_reveal_and_cursor_use_same_week_timeline():
     assert "#scan-clip rect{animation:scan-width 12s linear infinite}" in style
     assert "0.00000%{transform:translate(346.00px,0)}" in style
     assert "75.00000%{transform:translate(894.00px,0)}" in style
+
+
+@pytest.mark.parametrize(("latest_days", "expected_y"), [(1, "107.80"), (3, "83.00"), (7, "83.00")])
+def test_latest_wave_point_uses_seven_days(latest_days, expected_y):
+    start = date(2025, 1, 5)
+    weeks = []
+    for week, counts in enumerate(((8, 2, 2, 2, 2, 2, 2), (4, 6, 2, 2, 2, 2, 2)[:latest_days])):
+        weeks.append({"contributionDays": [
+            {
+                "date": (start + timedelta(days=week * 7 + weekday)).isoformat(),
+                "contributionCount": count,
+                "contributionLevel": "FIRST_QUARTILE",
+            }
+            for weekday, count in enumerate(counts)
+        ]})
+    data = parse_contribution_calendar({"weeks": weeks})
+    root = ET.fromstring(render_svg(data, build_schedule(data)))
+
+    assert root.find(".//s:path[@class='wave-line']", NS).get("d") == f"M 346.00 83.00 L 894.00 {expected_y}"
+    assert float(root.find(".//s:circle[@id='scan-dot']", NS).get("cy")) == float(expected_y)
+    assert ("LATEST POINT · LAST 7 DAYS" in "".join(root.itertext())) == (latest_days < 7)
+    assert len(root.findall(".//s:rect[@class='cell-active']", NS)) == 7 + latest_days
 
 
 def test_light_theme_and_bad_theme():
